@@ -1,9 +1,6 @@
 package org.coderhouse.billing.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -12,6 +9,7 @@ import lombok.*;
 @Getter //generate all getters for all properties
 @Setter //generate all setters for all properties
 @ToString //to get a string representation of the object
+@Table(name = "clients") //defines what the entity is called in the DB
 public class Client {
     //properties
     @Id
