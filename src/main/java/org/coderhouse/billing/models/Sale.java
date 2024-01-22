@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,8 +15,8 @@ import java.util.Set;
 @Getter //generate all getters for all properties
 @Setter //generate all setters for all properties
 @ToString //to get a string representation of the object
-@Table(name = "clients") //defines what the entity is called in the DB
-public class Client {
+@Table(name = "sale") //defines what the entity is called in the DB
+public class Sale {
     //properties
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,22 +25,23 @@ public class Client {
     private Integer id;
 
     @NonNull //verify that the value is not null
-    private String name;
+    private Integer amount;
 
     @NonNull
-    private String lastName;
+    private LocalDateTime date;
 
-    @NonNull
-    private String dni;
+    private Long total;
 
-    @NonNull
-    private Integer age;
+    @ManyToOne //many-to-one relationship with SaleProduct
+    @JoinColumn(name ="client_id")
+    private Client client;
 
-    @OneToMany (mappedBy="client", fetch=FetchType.EAGER)
-    private Set<Sale> sales = new HashSet<>();
+    @OneToMany (mappedBy="sale", fetch=FetchType.EAGER) //one-to-may relationship with SaleProduct
+    private Set <SaleProduct> saleProducts = new HashSet<>();
 
-    public void addSale(Sale sale){
-        sale.setClient(this); //in Sale class set this client
-        sales.add(sale); // in collection sales add the sale object
+    public void addSaleProduct(SaleProduct saleProduct){
+        saleProduct.setSale(this);
+        saleProducts.add(saleProduct);
     }
+
 }
