@@ -13,7 +13,7 @@ import java.util.Set;
 @NoArgsConstructor //generate constructor without any arguments
 @Getter //generate all getters for all properties
 @Setter //generate all setters for all properties
-@ToString //to get a string representation of the object
+//@ToString //to get a string representation of the object
 @Table(name = "products") //defines what the entity is called in the DB
 public class Product {
     //properties

@@ -41,4 +41,9 @@ public class Client {
         sale.setClient(this); //in Sale class set this client
         sales.add(sale); // in collection sales add the sale object
     }
+
+    @Override
+    public String toString(){
+        return "Client{id=" + this.id + ", name='" + this.name +  ", this.lastName='" + this.lastName + '}';
+    }
 }

@@ -32,39 +32,23 @@ public class BillingApplication {
              Client client2 = new Client("Maria", "Rosas", "41.255.320",25);
             clientRepository.save(client2);
 
-
-//            List <Client> clientList = new ArrayList<>();
-//            clientList = clientRepository.findAll();
-//            System.out.println(clientList);
-//            System.out.println(clientList.get(0).toString());
-//            Client searchClient = clientList.get(0);
-//            System.out.println(searchClient.getId());
-
             //create product
-            Product tv22= new Product("Smart tv 22 pulgadas",800,9999,"smart tv 22 pulgadas, no delivery", 150000L);
+            Product tv22= new Product("Smart tv 22\"",800,9999,"smart tv 22 inches, no delivery", 150000L);
             //save product
             productRepository.save(tv22);
+
             //create sale
             Sale sale1 = new Sale(500, LocalDateTime.now());
-            saleRepository.save(sale1);
-            sale1.setTotal(sale1.getAmount()*tv22.getPrice());
             saleRepository.save(sale1);
 
             //add sale to client
             client2.addSale(sale1);
 
-            saleRepository.save(sale1);
-
             //save client
             clientRepository.save(client2);
 
-            //System.out.println(client2.getSales());
-
-
-
-
-//            //set saleproduct
-            SaleProduct saleProduct1 = new SaleProduct(tv22,sale1);
+            //set saleproduct
+            SaleProduct saleProduct1 = new SaleProduct(tv22,sale1, sale1.getAmount());
             //addsaleproduct to sale
             sale1.addSaleProduct(saleProduct1);
             //add saleproduct to product
@@ -75,6 +59,24 @@ public class BillingApplication {
             //saves
             saleRepository.save(sale1);
             productRepository.save(tv22);
+
+            //set  total sale
+            sale1.calculateTotal();
+
+            //save sale
+            saleRepository.save(sale1);
+
+
+            //prints
+//            List <Client> clientList = new ArrayList<>();
+//            clientList = clientRepository.findAll();
+//            System.out.println(clientList);
+//            System.out.println(clientList.get(0).toString());
+//            Client searchClient = clientList.get(0);
+//            System.out.println(searchClient.getId());
+//
+          System.out.println(client2.getSales()); //no entiendo por que esto me arroja el tostring  de sale, ver
+
 
 
         });

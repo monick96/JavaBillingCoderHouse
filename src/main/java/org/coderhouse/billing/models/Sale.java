@@ -14,7 +14,6 @@ import java.util.Set;
 @NoArgsConstructor //generate constructor without any arguments
 @Getter //generate all getters for all properties
 @Setter //generate all setters for all properties
-@ToString //to get a string representation of the object
 @Table(name = "sale") //defines what the entity is called in the DB
 public class Sale {
     //properties
@@ -43,5 +42,30 @@ public class Sale {
         saleProduct.setSale(this);
         saleProducts.add(saleProduct);
     }
+
+    @Override
+    public String toString(){
+        StringBuilder result = new StringBuilder();
+        result.append("Client: ").append(client.getName()).append(" ").append(client.getLastName()).append("\n");
+        result.append("Total purchase: $").append(calculateTotal()).append("\n");
+        result.append("Products:\n");
+
+        for (SaleProduct saleProduct : saleProducts) {
+            result.append("  - ").append(saleProduct.getProduct().getName()).append(": ");
+            result.append("Quantity: ").append(saleProduct.getQuantity()).append(", ");
+            result.append("Unit price: ").append(saleProduct.getProduct().getPrice()).append("\n");
+        }
+
+        return result.toString();
+    }
+
+    public Long calculateTotal() {
+        this.total = 0L;
+        for (SaleProduct saleProduct : saleProducts) {
+            total += saleProduct.getQuantity() * saleProduct.getProduct().getPrice();
+        }
+        return total;
+    }
+
 
 }
