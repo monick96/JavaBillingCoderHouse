@@ -12,3 +12,14 @@ Starting from the structure provided by Coder House (jpa, lombok, mysql server, 
 the Client class that represents the table generated in the previous class must be developed in it.
 Methods will be generated to recover all clients, one client by name and delete one client by name. 
 Everything must be tested via the main method.
+
+## Task2
+Create the customer table with the following attributes: first name, last name, date of birth. Additionally, create a restcontroller that returns a json with the following structure:
+{
+name: XXXXXX,
+last name: YYYYYY,
+years: #####
+}
+In the service layer, the age of the person consulted must be calculated and the JSON returned.
+
+
