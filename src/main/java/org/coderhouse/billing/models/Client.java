@@ -1,9 +1,11 @@
 package org.coderhouse.billing.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,8 +34,11 @@ public class Client {
     private String dni;
 
     @NonNull
+    private LocalDate birthdate;
+
     private Integer age;
 
+    @JsonIgnore
     @OneToMany (mappedBy="client", fetch=FetchType.EAGER)
     private Set<Sale> sales = new HashSet<>();
 
@@ -43,7 +48,9 @@ public class Client {
     }
 
     @Override
-    public String toString(){
-        return "Client{id=" + this.id + ", name='" + this.name +  ", this.lastName='" + this.lastName + '}';
+    public String toString() {
+
+        return "name= " + this.name + ", lastName= " + this.lastName + ", age= " + this.age;
+
     }
 }
