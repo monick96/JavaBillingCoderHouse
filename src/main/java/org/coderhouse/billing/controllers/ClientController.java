@@ -20,6 +20,7 @@ public class ClientController {
 
     @GetMapping("/clients")
     public List<ClientDTO> getClients(){
+
         //obtain all clients
         List<ClientDTO> clientList = clientService.getClientsDTOList();
 

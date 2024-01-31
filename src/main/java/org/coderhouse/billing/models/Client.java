@@ -38,8 +38,8 @@ public class Client {
 
     private Integer age;
 
-    @JsonIgnore
-    @OneToMany (mappedBy="client", fetch=FetchType.EAGER)
+    //@JsonIgnore //using a DTO there is no recursion
+    @OneToMany (mappedBy="client", fetch=FetchType.LAZY)
     private Set<Sale> sales = new HashSet<>();
 
     public void addSale(Sale sale){
