@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 @Service //To be able to autowire ClientService in ClientController,
         // it is very important that you have this bean @Service
 public class ClientService {

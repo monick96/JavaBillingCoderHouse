@@ -20,7 +20,9 @@ public class ClientDTO {
     public ClientDTO(Client client){
 
         this.name = client.getName();
+
         this.lastName= client.getLastName();
+
         this.age= client.getAge();
 
     }
