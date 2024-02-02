@@ -22,9 +22,11 @@ public class ProductService {
     }
 
     public List<ProductDTO> getProductDTOList(){
+
         return productRepository.findAll()
                 .stream()
                 .map(product -> new ProductDTO(product))
                 .collect(Collectors.toList());
+
     }
 }

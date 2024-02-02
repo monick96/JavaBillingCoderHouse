@@ -1,5 +1,6 @@
 package org.coderhouse.billing.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -19,11 +20,13 @@ public class SaleProduct {
     @Getter //only getter for id- field-level annotation takes priority
     private Integer id;
 
+    @JsonIgnore
     @ManyToOne //many-to-one relationship with Product
     @JoinColumn(name ="product_id")
     @NonNull
     private Product product;
 
+    @JsonIgnore
     @ManyToOne //many-to-one relationship with Product
     @JoinColumn(name ="sale_id")
     @NonNull

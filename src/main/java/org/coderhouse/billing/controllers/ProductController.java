@@ -22,5 +22,6 @@ public class ProductController {
         List<ProductDTO> productsDTOs = productService.getProductDTOList();
 
         return productsDTOs;
+
     }
 }

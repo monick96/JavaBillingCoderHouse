@@ -38,7 +38,6 @@ public class ClientService {
                 .stream()
                 .map(client -> new ClientDTO(client))
                 .collect(Collectors.toList());
-
     }
 
     //method to calculate age

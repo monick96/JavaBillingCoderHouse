@@ -1,5 +1,6 @@
 package org.coderhouse.billing.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -31,11 +32,13 @@ public class Sale {
 
     private Long total;
 
+
     @ManyToOne //many-to-one relationship with SaleProduct
     @JoinColumn(name ="client_id")
     private Client client;
 
-    @OneToMany (mappedBy="sale", fetch=FetchType.EAGER) //one-to-may relationship with SaleProduct
+
+    @OneToMany (mappedBy="sale", fetch=FetchType.LAZY) //one-to-may relationship with SaleProduct
     private Set <SaleProduct> saleProducts = new HashSet<>();
 
     public void addSaleProduct(SaleProduct saleProduct){

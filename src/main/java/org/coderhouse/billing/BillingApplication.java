@@ -79,7 +79,7 @@ public class BillingApplication {
 //            Client searchClient = clientList.get(0);
 //            System.out.println(searchClient.getId());
 //
-           // System.out.println(client2.getSales()); //no entiendo por que esto me arroja el tostring  de sale, ver
+           // System.out.println(client2.getSales()); //Java Use Sale's toString() to display details
 
 
         });
