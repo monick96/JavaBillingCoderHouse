@@ -5,10 +5,6 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.coderhouse.billing.models.SaleProduct;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
 @NoArgsConstructor //generate constructor without any arguments
 @Getter //generate all getters for all properties
 public class SaleProductDTO {
