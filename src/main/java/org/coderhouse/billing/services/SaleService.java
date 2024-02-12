@@ -1,7 +1,9 @@
 package org.coderhouse.billing.services;
 import org.coderhouse.billing.dtos.ProductDTO;
+import org.coderhouse.billing.dtos.SaleProductDTO;
 import org.coderhouse.billing.dtos.SaleReceiptDTO;
 import org.coderhouse.billing.models.Sale;
+import org.coderhouse.billing.models.SaleProduct;
 import org.coderhouse.billing.repositories.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,7 @@ public class SaleService {
     @Autowired
     SaleRepository saleRepository;
 
+
     public void saveSale(Sale sale){
 
         saleRepository.save(sale);
@@ -28,7 +31,13 @@ public class SaleService {
 
         return saleRepository.findAll()
                 .stream()
-                .map(sale -> new SaleReceiptDTO(sale))
+                .map(sale -> {
+                    int totalProductQuantity = calculateTotalProductQuantity(sale); // Calculate the total number of products sold
+                    SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(sale);
+                    saleReceiptDTO.setTotalProductQuantity(totalProductQuantity); // Assigns the total quantity of products sold to the SaleReceiptDTO
+
+                    return saleReceiptDTO;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -53,42 +62,14 @@ public class SaleService {
 
     }
 
+    public int calculateTotalProductQuantity(Sale sale) {
+        return sale.getSaleProducts()
+                .stream()
+                .mapToInt(SaleProduct::getQuantity)
+                .sum();
+    }
 
 
-    //function using map and stream()
-//    public List<SaleDTO> getSalesDTOsList(){
-//        //obtain all sales order by date
-//        List<Sale> sortedSales = saleRepository.findAllByOrderByDateAsc();
-//
-//        //create a SaleDTO list using map and stream()
-//        List<SaleDTO> salesDTO = sortedSales.stream() //sequence of elements on which high-level operations can be performed
-//                .map(sale -> new SaleDTO(sale))// Convert each Sale to SaleDTO using its constructor
-//                .collect(Collectors.toList()); // Collect the SaleDTOs in a list
-//
-//        return salesDTO;
-//
-//    }
-    //function using loop
-//    public List<SaleDTO> getSalesDTOsList(){
-//        //obtain all sales
-//        List<Sale> sales = saleRepository.findAll();
-//
-//        //order by date
-//        sales.sort((sale1, sale2) -> sale1.getDate().compareTo(sale2.getDate()));
-//
-//        //create a new list sale dto type
-//        List<SaleDTO> sortedSalesDTO = new ArrayList<>();
-//
-//        //for each sale en sortedSales create a new object type SaleDTO
-//        //and save de new objet type SaleDTO to the list salesDTO
-//        for (Sale sale: sales){
-//
-//            SaleDTO saleDTO = new SaleDTO(sale);
-//
-//            sortedSalesDTO.add(saleDTO);
-//        }
-//
-//        return sortedSalesDTO;
-//
-//    }
+
+
 }

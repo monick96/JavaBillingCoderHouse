@@ -1,5 +1,8 @@
 package org.coderhouse.billing;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.info.Info;
 import org.coderhouse.billing.models.Client;
 import org.coderhouse.billing.models.Product;
 import org.coderhouse.billing.models.Sale;
@@ -20,6 +23,18 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @SpringBootApplication
+@OpenAPIDefinition(
+        info = @Info(
+                title = "My Billing API",
+                version = "1.0",
+                description = "This API allows you to manage customer billing.",
+                contact = @Contact(
+                        name = "Monica Melgarejo",
+
+                        url = "https://www.linkedin.com/in/monica-melgarejo-esquivel-2b1b39164/"
+                )
+        )
+)
 public class BillingApplication {
 
     public static void main(String[] args) {
@@ -30,7 +45,6 @@ public class BillingApplication {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
 
     @Bean
     public CommandLineRunner initData(ClientService clientService, ClientRepository clientRepository, ProductRepository productRepository, SaleRepository saleRepository, SaleProductRepository saleProductRepository, ExternalWebService externalWebService) {
