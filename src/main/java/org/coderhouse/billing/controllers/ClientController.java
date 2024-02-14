@@ -1,6 +1,11 @@
 package org.coderhouse.billing.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.coderhouse.billing.dtos.ClientDTO;
+import org.coderhouse.billing.dtos.SaleReceiptDTO;
 import org.coderhouse.billing.models.Client;
 import org.coderhouse.billing.repositories.ClientRepository;
 import org.coderhouse.billing.services.ClientService;
@@ -18,6 +23,24 @@ public class ClientController {
     @Autowired
     private ClientService clientService;
 
+    //obtain all clientsDTO
+    @Operation(
+            summary = "obtain all clientsDTO",
+            description = "Returns a list of all available clients in DTO format.",
+            operationId = "getClients",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Successful operation",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(
+                                            implementation = ClientDTO.class
+                                    )
+                            )
+                    )
+            }
+    )
     @GetMapping("/clients")
     public List<ClientDTO> getClients(){
 
