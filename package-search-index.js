@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"org.coderhouse.billing"},{"l":"org.coderhouse.billing.controllers"},{"l":"org.coderhouse.billing.dtos"},{"l":"org.coderhouse.billing.models"},{"l":"org.coderhouse.billing.repositories"},{"l":"org.coderhouse.billing.services"}];updateSearchResults();
