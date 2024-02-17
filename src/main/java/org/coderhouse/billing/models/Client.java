@@ -1,6 +1,5 @@
 package org.coderhouse.billing.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -10,7 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@RequiredArgsConstructor//generate constructor with only required arguments
 @NoArgsConstructor //generate constructor without any arguments
 @Getter //generate all getters for all properties
 @Setter //generate all setters for all properties
@@ -24,16 +22,16 @@ public class Client {
     @Getter //only getter for id- field-level annotation takes priority
     private Integer id;
 
-    @NonNull //verify that the value is not null
+    //@NonNull //verify that the value is not null
     private String name;
 
-    @NonNull
+    //@NonNull
     private String lastName;
 
-    @NonNull
+    // @NonNull
     private String dni;
 
-    @NonNull
+    //@NonNull
     private LocalDate birthdate;
 
     private Integer age;
@@ -41,6 +39,16 @@ public class Client {
     //@JsonIgnore //using a DTO there is no recursion
     @OneToMany (mappedBy="client", fetch=FetchType.LAZY)
     private Set<Sale> sales = new HashSet<>();
+
+    //constructor
+
+
+    public Client(String name,String lastName, String dni, LocalDate birthdate) {
+        this.name = name;
+        this.lastName = lastName;
+        this.dni = dni;
+        this.birthdate = birthdate;
+    }
 
     public void addSale(Sale sale){
         sale.setClient(this); //in Sale class set this client

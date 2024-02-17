@@ -10,10 +10,10 @@ import org.coderhouse.billing.models.Client;
 import org.coderhouse.billing.repositories.ClientRepository;
 import org.coderhouse.billing.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +48,43 @@ public class ClientController {
         List<ClientDTO> clientList = clientService.getClientsDTOList();
 
         return  clientList;
+
+    }
+
+//    @Operation(
+//            summary = "Register a client",
+//            description = "Returns a list of all available clients in DTO format.",
+//            operationId = "getClients",
+//            responses = {
+//                    @ApiResponse(
+//                            responseCode = "200",
+//                            description = "Successful operation",
+//                            content = @Content(
+//                                    mediaType = "application/json",
+//                                    schema = @Schema(
+//                                            implementation = ClientDTO.class
+//                                    )
+//                            )
+//                    )
+//            }
+//    )
+
+    @Operation(summary = "Register a new client",
+            description = "Registers a new client with the provided details.",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Client registered successfully"),
+                    @ApiResponse(responseCode = "409", description = "Conflict Bad request"),
+                    @ApiResponse(responseCode = "409", description = "Conflict Missing field"),
+                    @ApiResponse(responseCode = "409", description = "Conflict Client already exists"),
+
+            })
+
+    @PostMapping("/clients")
+    public ResponseEntity<Object> registerClient(
+            @RequestParam String name, @RequestParam String lastName,
+            @RequestParam String dni, @RequestParam LocalDate birthdate){
+
+        return clientService.registerClient(name, lastName, dni, birthdate);
 
     }
 
