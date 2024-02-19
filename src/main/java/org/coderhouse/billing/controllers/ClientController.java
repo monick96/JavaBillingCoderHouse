@@ -1,6 +1,7 @@
 package org.coderhouse.billing.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -51,42 +52,41 @@ public class ClientController {
 
     }
 
-//    @Operation(
-//            summary = "Register a client",
-//            description = "Returns a list of all available clients in DTO format.",
-//            operationId = "getClients",
-//            responses = {
-//                    @ApiResponse(
-//                            responseCode = "200",
-//                            description = "Successful operation",
-//                            content = @Content(
-//                                    mediaType = "application/json",
-//                                    schema = @Schema(
-//                                            implementation = ClientDTO.class
-//                                    )
-//                            )
-//                    )
-//            }
-//    )
-
     @Operation(summary = "Register a new client",
             description = "Registers a new client with the provided details.",
+            operationId = "registerClient",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Client registered successfully"),
-                    @ApiResponse(responseCode = "409", description = "Conflict Bad request"),
-                    @ApiResponse(responseCode = "409", description = "Conflict Missing field"),
-                    @ApiResponse(responseCode = "409", description = "Conflict Client already exists"),
-
-            })
-
+                    @ApiResponse(responseCode = "409", description = "Conflict: Bad request"),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Missing field"),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Client already exists")
+            }
+    )
     @PostMapping("/clients")
     public ResponseEntity<Object> registerClient(
             @RequestParam String name, @RequestParam String lastName,
             @RequestParam String dni, @RequestParam LocalDate birthdate){
 
-        return clientService.registerClient(name, lastName, dni, birthdate);
+        return clientService.registerNewClient(name, lastName, dni, birthdate);
 
     }
+
+    @PutMapping("/clients")
+    @Operation(summary = "Deactivate a client",
+            description = "Deactivates a client and all associated active sales.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Client and associated sales deactivated successfully"),
+                    @ApiResponse(responseCode = "404", description = "Client not found")
+            })
+    public ResponseEntity<Object>deactivateClient(
+            @Parameter(description = "ID of the client to deactivate", required = true)
+            @RequestParam Integer clientID){
+
+        return clientService.deactivateClient(clientID);
+
+    }
+
+
 
 
 

@@ -3,6 +3,7 @@ package org.coderhouse.billing.services;
 import ch.qos.logback.core.joran.conditional.IfAction;
 import org.coderhouse.billing.dtos.ClientDTO;
 import org.coderhouse.billing.models.Client;
+import org.coderhouse.billing.models.Sale;
 import org.coderhouse.billing.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,8 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository; //allows access to methods and functionality
                                                 // provided by ClientRepository within ClientService
+    @Autowired
+    private SaleService saleService;
 
     public void saveClient(Client client){
 
@@ -37,7 +40,7 @@ public class ClientService {
 
         //I get the list of clients and map
         // it to data objects that only bring the data I need
-        return clientRepository.findAll()
+        return clientRepository.findByIsActiveTrue()
                 .stream()
                 .map(client -> new ClientDTO(client))
                 .collect(Collectors.toList());
@@ -80,7 +83,7 @@ public class ClientService {
 
     }
     
-    public ResponseEntity<Object> registerClient(String name,  String lastName,String dni, LocalDate birthdate){
+    public ResponseEntity<Object> registerNewClient(String name,  String lastName,String dni, LocalDate birthdate){
 
         //validate params is not null
         if (name.isBlank() || lastName.isBlank() || dni.isBlank() || birthdate == null) {
@@ -126,6 +129,9 @@ public class ClientService {
         //calculate age
         newClient.setAge(calculateAge(newClient));
 
+        //activate client
+        newClient.setIsActive(true);
+
         //save client
         saveClient(newClient);
 
@@ -133,5 +139,36 @@ public class ClientService {
         return ResponseEntity.status(HttpStatus.CREATED).body("Successful registration");
 
     }
+
+    public ResponseEntity<Object> deactivateClient(Integer clientID){
+        //validate client is saved in DB
+
+        Client client = clientRepository.findById(clientID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
+
+        //verify client has active sales
+        List <Sale> activeSales = saleService.getActiveSales(client);
+
+        if (!activeSales.isEmpty()) {
+
+            activeSales.forEach(sale -> {
+                // Deactivate each active sale
+                sale.setIsActive(false);
+
+                // save changes in sales
+                saleService.saveSale(sale);
+            });
+
+        }
+
+        // Desactivar el cliente
+        client.setIsActive(false);
+        saveClient(client);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
+
+    }
+
+
 
 }

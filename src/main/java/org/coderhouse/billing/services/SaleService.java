@@ -1,7 +1,6 @@
 package org.coderhouse.billing.services;
-import org.coderhouse.billing.dtos.ProductDTO;
-import org.coderhouse.billing.dtos.SaleProductDTO;
 import org.coderhouse.billing.dtos.SaleReceiptDTO;
+import org.coderhouse.billing.models.Client;
 import org.coderhouse.billing.models.Sale;
 import org.coderhouse.billing.models.SaleProduct;
 import org.coderhouse.billing.repositories.SaleRepository;
@@ -25,11 +24,18 @@ public class SaleService {
 
     }
 
+    //verify client has sale by client an is active true
+    public List<Sale> getActiveSales(Client client) {
+        // Verificar si el cliente tiene ventas activas
+        return saleRepository.findByClientAndIsActiveTrue(client);
+    }
+
+
     //obtain all sales
 
     public List<SaleReceiptDTO> getSalesReceiptsDTO(){
 
-        return saleRepository.findAll()
+        return saleRepository.findByIsActiveTrue()
                 .stream()
                 .map(sale -> {
                     int totalProductQuantity = calculateTotalProductQuantity(sale); // Calculate the total number of products sold

@@ -9,6 +9,9 @@ import org.coderhouse.billing.models.Product;
 @NoArgsConstructor //generate constructor without any arguments
 @Getter //generate all getters for all properties
 public class ProductDTO {
+    @NonNull
+    @Schema(description = "ID of the product", required = true, example = "1")
+    private Integer id;
 
     @NonNull
     @Schema(description = "Name of the product", required = true, example = "Electric Scooter")
@@ -27,6 +30,7 @@ public class ProductDTO {
     private Long price;
 
     public ProductDTO(Product product){
+        this.id = product.getId();
 
         this.name = product.getName();
 

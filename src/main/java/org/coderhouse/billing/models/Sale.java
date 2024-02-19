@@ -32,6 +32,8 @@ public class Sale {
 
     private Long total;
 
+    private Boolean isActive;
+
 
     @ManyToOne //many-to-one relationship with SaleProduct
     @JoinColumn(name ="client_id")

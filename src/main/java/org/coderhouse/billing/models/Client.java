@@ -36,6 +36,8 @@ public class Client {
 
     private Integer age;
 
+    private Boolean isActive;
+
     //@JsonIgnore //using a DTO there is no recursion
     @OneToMany (mappedBy="client", fetch=FetchType.LAZY)
     private Set<Sale> sales = new HashSet<>();
