@@ -40,10 +40,16 @@ public class ClientService {
 
         //I get the list of clients and map
         // it to data objects that only bring the data I need
-        return clientRepository.findByIsActiveTrue()
-                .stream()
-                .map(client -> new ClientDTO(client))
-                .collect(Collectors.toList());
+        List<Client> activeClients = clientRepository.findByIsActiveTrue();
+
+        if (!activeClients.isEmpty()) {
+            return activeClients
+                    .stream()
+                    .map(client -> new ClientDTO(client))
+                    .collect(Collectors.toList());
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active clients found.");
     }
 
     //method to calculate age
@@ -142,30 +148,37 @@ public class ClientService {
 
     public ResponseEntity<Object> deactivateClient(Integer clientID){
         //validate client is saved in DB
-
         Client client = clientRepository.findById(clientID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
 
-        //verify client has active sales
-        List <Sale> activeSales = saleService.getActiveSales(client);
+        if (client.getIsActive()) {
+            //verify client has active sales
+            List <Sale> activeSales = saleService.getActiveSales(client);
 
-        if (!activeSales.isEmpty()) {
+            if (!activeSales.isEmpty()) {
 
-            activeSales.forEach(sale -> {
-                // Deactivate each active sale
-                sale.setIsActive(false);
+                activeSales.forEach(sale -> {
+                    // Deactivate each active sale
+                    sale.setIsActive(false);
 
-                // save changes in sales
-                saleService.saveSale(sale);
-            });
+                    // save changes in sales
+                    saleService.saveSale(sale);
+                });
+
+            }
+
+            // Desactivar el cliente
+            client.setIsActive(false);
+            saveClient(client);
+
+            return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
+
+        }else {
+
+            // The client is not active, so we return a "Bad Request" error
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Client is not active and cannot be deactivated");
 
         }
-
-        // Desactivar el cliente
-        client.setIsActive(false);
-        saveClient(client);
-
-        return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
 
     }
 

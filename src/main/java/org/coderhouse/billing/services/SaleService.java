@@ -5,6 +5,7 @@ import org.coderhouse.billing.models.Sale;
 import org.coderhouse.billing.models.SaleProduct;
 import org.coderhouse.billing.repositories.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,17 +35,23 @@ public class SaleService {
     //obtain all sales
 
     public List<SaleReceiptDTO> getSalesReceiptsDTO(){
+        List<Sale> activeSales = saleRepository.findByIsActiveTrue();
 
-        return saleRepository.findByIsActiveTrue()
-                .stream()
-                .map(sale -> {
-                    int totalProductQuantity = calculateTotalProductQuantity(sale); // Calculate the total number of products sold
-                    SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(sale);
-                    saleReceiptDTO.setTotalProductQuantity(totalProductQuantity); // Assigns the total quantity of products sold to the SaleReceiptDTO
+        if (!activeSales.isEmpty()) {
+            return activeSales .stream()
+                    .map(sale -> {
+                        int totalProductQuantity = calculateTotalProductQuantity(sale); // Calculate the total number of products sold
+                        SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(sale);
+                        saleReceiptDTO.setTotalProductQuantity(totalProductQuantity); // Assigns the total quantity of products sold to the SaleReceiptDTO
 
-                    return saleReceiptDTO;
-                })
-                .collect(Collectors.toList());
+                        return saleReceiptDTO;
+                    })
+                    .collect(Collectors.toList());
+
+        }else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active sales found.");
+        }
+
     }
 
     //sale receipt by id
