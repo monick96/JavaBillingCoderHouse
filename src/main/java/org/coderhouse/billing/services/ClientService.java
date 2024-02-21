@@ -35,6 +35,16 @@ public class ClientService {
 
     }
 
+    //get client by id
+
+    public Client getClientById(Integer clientId){
+        Optional<Client> optionalClient = clientRepository.findById(clientId);
+        if (optionalClient.isPresent()) {
+            return optionalClient.get();
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found");
+    }
+
     //method to get all clients
     public List<ClientDTO> getClientsDTOList() {
 
@@ -75,6 +85,24 @@ public class ClientService {
     public boolean isClientValid(Client client){
 
        Optional<Client> checkClient = clientRepository.findById(client.getId());
+
+        //verify the client is saved in DB;
+        if (checkClient.isPresent()){
+
+            return true;
+
+        }else {
+
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found.");
+
+        }
+
+    }
+
+    ///validate by id
+    public boolean isClientValidById(Integer clientId){
+
+        Optional<Client> checkClient = clientRepository.findById(clientId);
 
         //verify the client is saved in DB;
         if (checkClient.isPresent()){

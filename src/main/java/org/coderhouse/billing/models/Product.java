@@ -38,6 +38,8 @@ public class Product {
     @NonNull
     private Long price;
 
+    private Boolean isActive;
+
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     private Set<SaleProduct> saleProducts = new HashSet<>();
 
