@@ -6,11 +6,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.coderhouse.billing.dtos.ClientDTO;
 import org.coderhouse.billing.dtos.ProductDTO;
+import org.coderhouse.billing.models.Product;
 import org.coderhouse.billing.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -46,5 +47,15 @@ public class ProductController {
 
         return productsDTOs;
 
+    }
+
+    @PutMapping("/{productId}/products")
+    public ResponseEntity<Object> updateProductPrice(@PathVariable Integer productId, @RequestParam Long newPrice) {
+        Product updatedProduct = productService.updateProductPrice(productId, newPrice);
+        if (updatedProduct != null) {
+            return ResponseEntity.ok(updatedProduct);
+        } else {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("product not found");
+        }
     }
 }

@@ -7,6 +7,7 @@ import org.coderhouse.billing.models.Client;
 import org.coderhouse.billing.models.Product;
 import org.coderhouse.billing.models.Sale;
 import org.coderhouse.billing.models.SaleProduct;
+import org.coderhouse.billing.repositories.SaleProductRepository;
 import org.coderhouse.billing.repositories.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,12 @@ public class SaleService {
 
     @Autowired
     ProductService productService;
+
+    @Autowired
+    ExternalWebService externalWebService;
+
+    @Autowired
+    SaleProductRepository saleProductRepository;
 
 
     public void saveSale(Sale sale){
@@ -64,9 +72,9 @@ public class SaleService {
     }
 
     // receive DTO from sales to generate receipt
-    public Sale createSale(SaleRequestDTO saleRequestDTO){
+    public ResponseEntity<Object> createSale(SaleRequestDTO saleRequestDTO){
 
-        isValidSaleRequestDTO(saleRequestDTO);
+        ValidSaleRequestDTO(saleRequestDTO);
 
         //create a new sale object
         Sale newSale = new Sale();
@@ -78,43 +86,63 @@ public class SaleService {
 
         newSale.setClient(client);
 
+        saveSale(newSale);
+
+
         // Iterate over each SaleItemDTO and add it to the sale
         for(SaleItemDTO saleItemDTO : saleRequestDTO.getSales()){
-            //create saleProduct from saleitemDTO
-            SaleProduct newSaleProduct = new SaleProduct();
-
             //Assign the product to saleproduct object
             Integer productId = saleItemDTO.getProductId();
             Product product = productService.getProductById(productId);
-            newSaleProduct.setProduct(product);
-
-            //assign quantity
-            newSaleProduct.setQuantity(saleItemDTO.getQuantity());
+            //create saleProduct from saleitemDTO
+            SaleProduct newSaleProduct = new SaleProduct(product,newSale,saleItemDTO.getQuantity());
 
             //assign saleitem to sale
             newSale.addSaleProduct(newSaleProduct);
+
+            //save saleproduct in db
+            saleProductRepository.save(newSaleProduct);
+
         }
+
+
+
+        //generate date for the buy
+        LocalDateTime datePurchase = externalWebService.getCurrentDate();
+        //assign date to sale
+        newSale.setDate(datePurchase);
+
+        //calculate total
+        newSale.calculateTotal();
+
+        newSale.setAmount(calculateTotalProductQuantity(newSale));
+
+        newSale.setIsActive(true);
+
         saveSale(newSale);
 
-        return newSale;
+        SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(newSale);
+
+        saleReceiptDTO.setTotalProductQuantity(calculateTotalProductQuantity(newSale));
+
+        return ResponseEntity.ok(saleReceiptDTO);
 
     }
 
     //validate SaleRequestDTO
-    public void isValidSaleRequestDTO(SaleRequestDTO saleRequestDTO) {
+    public ResponseEntity<Object> ValidSaleRequestDTO(SaleRequestDTO saleRequestDTO) {
         //Verify that the SaleRequestDTO object is not null
         if (saleRequestDTO == null) {
 
-            ResponseEntity.badRequest().body("SaleRequestDTO is null");
-            return;
+            return ResponseEntity.badRequest().body("SaleRequestDTO is null");
 
         }
 
         //Verify that the ClientId in SaleRequestDTO is not null and has a valid ID
         if (saleRequestDTO.getClientId() == null || saleRequestDTO.getClientId() <= 0) {
 
-            ResponseEntity.badRequest().body("Invalid Client ID in SaleRequestDTO");
-            return;
+            return ResponseEntity.badRequest().body("Invalid Client ID in SaleRequestDTO");
+
 
         }
 
@@ -124,8 +152,8 @@ public class SaleService {
         // Verify that the list of sales items is not null or empty
         if (saleRequestDTO.getSales() == null || saleRequestDTO.getSales().isEmpty()) {
 
-            ResponseEntity.badRequest().body("Sales list is null or empty");
-            return;
+            return ResponseEntity.badRequest().body("Sales list is null or empty");
+
 
         }
 
@@ -134,8 +162,8 @@ public class SaleService {
             // Verify that the quantity is a positive and integer number
             if (!NumberUtils.isCreatable(String.valueOf(saleItemDTO.getQuantity()))) {
 
-                ResponseEntity.badRequest().body("Quantity must be a number");
-                return;
+                return ResponseEntity.badRequest().body("Quantity must be a number");
+
 
             }
 
@@ -143,8 +171,8 @@ public class SaleService {
 
             if (quantity <= 0) {
 
-                ResponseEntity.badRequest().body("Quantity must be a positive integer");
-                return;
+                return ResponseEntity.badRequest().body("Quantity must be a positive integer");
+
             }
         }
 
@@ -154,28 +182,28 @@ public class SaleService {
 
             if(saleItemDTO.getProductId()==null){
 
-                ResponseEntity.badRequest().body("Product ID in SaleItemDTO must not be null");
-                return;
+                return ResponseEntity.badRequest().body("Product ID in SaleItemDTO must not be null");
+
 
             }
 
             // Verify that productId is a positive integer
             if (!NumberUtils.isDigits(String.valueOf(saleItemDTO.getProductId())) || Integer.parseInt(String.valueOf(saleItemDTO.getProductId())) <= 0) {
 
-                ResponseEntity.badRequest().body("Invalid Product ID in SaleItemDTO");
-                return;
+                return ResponseEntity.badRequest().body("Invalid Product ID in SaleItemDTO");
+
 
             }
             //verify that the product exist in db
             if (!productService.isProductExistById(saleItemDTO.getProductId())){
 
-                ResponseEntity.badRequest().body("Product with ID " + saleItemDTO.getProductId() + " not found");
-                return;
+                return ResponseEntity.badRequest().body("Product with ID " + saleItemDTO.getProductId() + " not found");
+
 
             }
 
             //verify stock is available
-            productService.isStockAvailable(saleItemDTO.getProductId(), saleItemDTO.getQuantity());
+            productService.stockAvailable(saleItemDTO.getProductId(), saleItemDTO.getQuantity());
 
             //update stock in each item
             productService.updateStock(saleItemDTO.getProductId(), saleItemDTO.getQuantity());
@@ -183,7 +211,7 @@ public class SaleService {
         }
 
         // If it passes all the checks, consider it valid
-        ResponseEntity.ok().build();
+        return ResponseEntity.ok().build();
     }
 
 

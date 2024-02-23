@@ -10,10 +10,7 @@ import org.coderhouse.billing.services.ClientService;
 import org.coderhouse.billing.services.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,8 +20,8 @@ public class SaleController {
     @Autowired
     SaleService saleService;
 
-    @Autowired
-    ClientService clientService;
+//    @Autowired
+//    ClientService clientService;
 
 
 
@@ -54,14 +51,12 @@ public class SaleController {
     }
 
     //create a postMapping method for createsale
-    @GetMapping("/salesReceipts")
+    @PostMapping("/salesReceipts")
     public ResponseEntity<Object> createSale(@RequestBody SaleRequestDTO saleRequestDTO){
-        Sale sale = new Sale();
-        sale = saleService.createSale(saleRequestDTO);
 
-        SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(sale);
+        return saleService.createSale(saleRequestDTO);
 
-        return ResponseEntity.ok(saleReceiptDTO);
+
 
     }
 

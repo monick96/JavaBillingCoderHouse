@@ -1,15 +1,12 @@
 package org.coderhouse.billing.services;
 
-import ch.qos.logback.core.joran.conditional.IfAction;
 import org.coderhouse.billing.dtos.ClientDTO;
 import org.coderhouse.billing.models.Client;
-import org.coderhouse.billing.models.Sale;
 import org.coderhouse.billing.repositories.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -26,8 +23,8 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository; //allows access to methods and functionality
                                                 // provided by ClientRepository within ClientService
-    @Autowired
-    private SaleService saleService;
+    //@Autowired
+   // private SaleService saleService;
 
     public void saveClient(Client client){
 
@@ -174,41 +171,41 @@ public class ClientService {
 
     }
 
-    public ResponseEntity<Object> deactivateClient(Integer clientID){
-        //validate client is saved in DB
-        Client client = clientRepository.findById(clientID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
-
-        if (client.getIsActive()) {
-            //verify client has active sales
-            List <Sale> activeSales = saleService.getActiveSales(client);
-
-            if (!activeSales.isEmpty()) {
-
-                activeSales.forEach(sale -> {
-                    // Deactivate each active sale
-                    sale.setIsActive(false);
-
-                    // save changes in sales
-                    saleService.saveSale(sale);
-                });
-
-            }
-
-            // Desactivar el cliente
-            client.setIsActive(false);
-            saveClient(client);
-
-            return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
-
-        }else {
-
-            // The client is not active, so we return a "Bad Request" error
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Client is not active and cannot be deactivated");
-
-        }
-
-    }
+//    public ResponseEntity<Object> deactivateClient(Integer clientID){
+//        //validate client is saved in DB
+//        Client client = clientRepository.findById(clientID)
+//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
+//
+//        if (client.getIsActive()) {
+//            //verify client has active sales
+//            List <Sale> activeSales = saleService.getActiveSales(client);
+//
+//            if (!activeSales.isEmpty()) {
+//
+//                activeSales.forEach(sale -> {
+//                    // Deactivate each active sale
+//                    sale.setIsActive(false);
+//
+//                    // save changes in sales
+//                    saleService.saveSale(sale);
+//                });
+//
+//            }
+//
+//            // Desactivar el cliente
+//            client.setIsActive(false);
+//            saveClient(client);
+//
+//            return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
+//
+//        }else {
+//
+//            // The client is not active, so we return a "Bad Request" error
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Client is not active and cannot be deactivated");
+//
+//        }
+//
+//    }
 
 
 

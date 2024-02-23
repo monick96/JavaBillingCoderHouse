@@ -5,7 +5,10 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -41,10 +44,18 @@ public class Product {
     private Boolean isActive;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
+    private List<PriceHistory> priceHistory = new ArrayList<>();
+
+    @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     private Set<SaleProduct> saleProducts = new HashSet<>();
 
     public void addSaleProduct(SaleProduct saleProduct){
         saleProduct.setProduct(this);
         saleProducts.add(saleProduct);
+    }
+
+    public void addPriceHistory(PriceHistory priceHistory) {
+        priceHistory.setProduct(this);
+        this.priceHistory.add(priceHistory);
     }
 }
