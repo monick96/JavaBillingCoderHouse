@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.coderhouse.billing.models.Product;
+import org.coderhouse.billing.models.SaleProduct;
 
 @NoArgsConstructor //generate constructor without any arguments
 @Getter //generate all getters for all properties

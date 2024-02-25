@@ -43,10 +43,12 @@ public class Sale {
     @OneToMany (mappedBy="sale", fetch=FetchType.LAZY) //one-to-may relationship with SaleProduct
     private Set <SaleProduct> saleProducts = new HashSet<>();
 
+
     public void addSaleProduct(SaleProduct saleProduct){
         saleProduct.setSale(this);
         saleProducts.add(saleProduct);
     }
+
 
     @Override
     public String toString(){

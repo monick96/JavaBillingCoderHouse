@@ -3,11 +3,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.coderhouse.billing.dtos.SaleItemDTO;
 import org.coderhouse.billing.dtos.SaleReceiptDTO;
 import org.coderhouse.billing.dtos.SaleRequestDTO;
-import org.coderhouse.billing.models.Client;
-import org.coderhouse.billing.models.Product;
-import org.coderhouse.billing.models.Sale;
-import org.coderhouse.billing.models.SaleProduct;
+import org.coderhouse.billing.models.*;
 import org.coderhouse.billing.repositories.SaleProductRepository;
+import org.coderhouse.billing.repositories.SaleReceiptRepository;
 import org.coderhouse.billing.repositories.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,6 +34,9 @@ public class SaleService {
     @Autowired
     SaleProductRepository saleProductRepository;
 
+    @Autowired
+    SaleReceiptRepository saleReceiptRepository;
+
 
     public void saveSale(Sale sale){
 
@@ -52,21 +53,15 @@ public class SaleService {
 
     //obtain all sales
     public List<SaleReceiptDTO> getSalesReceiptsDTO(){
-        List<Sale> activeSales = saleRepository.findByIsActiveTrue();
+        List<SaleReceipt> saleReceipts = saleReceiptRepository.findAll();
 
-        if (!activeSales.isEmpty()) {
-            return activeSales .stream()
-                    .map(sale -> {
-                        int totalProductQuantity = calculateTotalProductQuantity(sale); // Calculate the total number of products sold
-                        SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(sale);
-                        saleReceiptDTO.setTotalProductQuantity(totalProductQuantity); // Assigns the total quantity of products sold to the SaleReceiptDTO
-
-                        return saleReceiptDTO;
-                    })
+        if (!saleReceipts.isEmpty()) {
+            return saleReceipts .stream()
+                    .map(SaleReceiptDTO::new)
                     .collect(Collectors.toList());
 
         }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No active sales found.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No found receipts.");
         }
 
     }
@@ -88,6 +83,8 @@ public class SaleService {
 
         saveSale(newSale);
 
+        SaleReceipt saleReceipt = new SaleReceipt(newSale);
+        saleReceiptRepository.save(saleReceipt);
 
         // Iterate over each SaleItemDTO and add it to the sale
         for(SaleItemDTO saleItemDTO : saleRequestDTO.getSales()){
@@ -97,11 +94,23 @@ public class SaleService {
             //create saleProduct from saleitemDTO
             SaleProduct newSaleProduct = new SaleProduct(product,newSale,saleItemDTO.getQuantity());
 
+            newSaleProduct.setPrice(product.getPrice());
+
             //assign saleitem to sale
             newSale.addSaleProduct(newSaleProduct);
 
+            //save item to product
+            product.addSaleProduct(newSaleProduct);
+
+            //save item to salereceipt
+            saleReceipt.addSaleProduct(newSaleProduct);
+
             //save saleproduct in db
             saleProductRepository.save(newSaleProduct);
+
+            productService.saveProduct(product);
+
+
 
         }
 
@@ -115,15 +124,19 @@ public class SaleService {
         //calculate total
         newSale.calculateTotal();
 
-        newSale.setAmount(calculateTotalProductQuantity(newSale));
+        newSale.setAmount(productService.calculateTotalProductQuantity(newSale));
 
         newSale.setIsActive(true);
 
         saveSale(newSale);
 
-        SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(newSale);
+        saleReceipt.setTotalProductQuantity(productService.calculateTotalProductQuantity(newSale));
+        saleReceipt.setDate(datePurchase);
+        saleReceipt.setTotalPurchase(newSale.getTotal());
 
-        saleReceiptDTO.setTotalProductQuantity(calculateTotalProductQuantity(newSale));
+        saleReceiptRepository.save(saleReceipt);
+
+        SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(saleReceipt);
 
         return ResponseEntity.ok(saleReceiptDTO);
 
@@ -226,7 +239,11 @@ public class SaleService {
 
             Sale sale = optionalSale.get();
 
-            return new SaleReceiptDTO(sale);
+            SaleReceipt saleReceipt = new SaleReceipt(sale);
+
+            saleReceiptRepository.save(saleReceipt);
+
+            return new SaleReceiptDTO(saleReceipt);
 
         }else {
 
@@ -235,13 +252,6 @@ public class SaleService {
         }
 
 
-    }
-    //method calculate total product cuantity
-    public int calculateTotalProductQuantity(Sale sale) {
-        return sale.getSaleProducts()
-                .stream()
-                .mapToInt(SaleProduct::getQuantity)
-                .sum();
     }
 
 

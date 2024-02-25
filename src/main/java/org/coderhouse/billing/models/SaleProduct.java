@@ -1,6 +1,7 @@
 package org.coderhouse.billing.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -32,7 +33,14 @@ public class SaleProduct {
     @NonNull
     private Sale sale;
 
+    @ManyToOne
+    @JoinColumn(name = "sale_receipt_id")
+    private SaleReceipt saleReceipt;
+
     @NonNull //verify that the value is not null //im not sure about this property
     private Integer quantity;
+
+    @Schema(description = "Price of the product", required = true, example = "1300000")
+    private Long price;
 
 }

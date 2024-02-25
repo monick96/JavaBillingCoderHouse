@@ -1,10 +1,9 @@
 package org.coderhouse.billing.services;
 
-import org.coderhouse.billing.dtos.ClientDTO;
 import org.coderhouse.billing.dtos.ProductDTO;
-import org.coderhouse.billing.models.PriceHistory;
 import org.coderhouse.billing.models.Product;
-import org.coderhouse.billing.repositories.PriceHistoryRepository;
+import org.coderhouse.billing.models.Sale;
+import org.coderhouse.billing.models.SaleProduct;
 import org.coderhouse.billing.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,8 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,9 +23,6 @@ public class ProductService {
 
     @Autowired
     ExternalWebService externalWebService;
-
-    @Autowired
-    PriceHistoryRepository priceHistoryRepository;
 
     public void saveProduct(Product product){
 
@@ -107,15 +103,20 @@ public class ProductService {
 
     public Product updateProductPrice(Integer productId, Long newPrice){
         Product product = getProductById(productId);
-        if (product != null) {
-            List<PriceHistory> priceHistory = product.getPriceHistory();
-            PriceHistory newPriceHistory = new PriceHistory(product.getPrice(),externalWebService.getCurrentDate(),product);
-            product.addPriceHistory(newPriceHistory); //save de last/actual price of product
+        if (product != null && !Objects.equals(product.getPrice(), newPrice)) {
             //set new price
             product.setPrice(newPrice); // Actualiza el precio actual
             productRepository.save(product); // Guarda el producto actualizado
-            priceHistoryRepository.save(newPriceHistory);
         }
         return product;
     }
+
+    //method calculate total product quantity
+    public int calculateTotalProductQuantity(Sale sale) {
+        return sale.getSaleProducts()
+                .stream()
+                .mapToInt(SaleProduct::getQuantity)
+                .sum();
+    }
+
 }

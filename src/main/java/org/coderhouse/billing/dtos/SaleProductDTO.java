@@ -17,7 +17,7 @@ public class SaleProductDTO {
     @Schema(description = "Description of the product", required = true, example = "RAM:(128 Gb)- color: Negro")
     private String productDescription;
 
-    @NonNull
+
     @Schema(description = "Price of the product", required = true, example = "1300000")
     private Long price;
 
@@ -33,7 +33,7 @@ public class SaleProductDTO {
 
         this.quantity = saleProduct.getQuantity();
 
-        this.price = saleProduct.getProduct().getPrice();
+        this.price = saleProduct.getPrice();
 
     }
 
