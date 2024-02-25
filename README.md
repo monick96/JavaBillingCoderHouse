@@ -65,5 +65,9 @@ In the service layer, the age of the person consulted must be calculated and the
       - 200: when the operation can be performed, whether query or update. 
         For example: the client exists, the client is returned and the status code 200
       - 409: when the operation cannot be performed, whether query or update.
+  
+
+### The final UML of this apllication billing:
+![billing.png](..%2Fbilling.png))
 
 
