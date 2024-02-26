@@ -254,6 +254,33 @@ public class SaleService {
 
     }
 
+    public Sale findSaleById(Integer saleId) {
+        Optional<Sale> optionalSale = saleRepository.findById(saleId);
+        if (optionalSale.isPresent()) {
+            Sale sale = optionalSale.get();
+            if (sale.getIsActive()) {
+
+                return sale;
+
+            } else {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sale is not active.");
+            }
+        }
+
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sale not found.");
+
+    }
+
+    public void deactivateSale(Integer saleId){
+
+        Sale sale= findSaleById(saleId);
+
+        if (saleRepository.existsById(saleId) && sale != null){
+            sale.setIsActive(false);
+            saveSale(sale);
+        }
+    }
+
 
 
 

@@ -68,6 +68,6 @@ In the service layer, the age of the person consulted must be calculated and the
   
 
 ### The final UML of this apllication billing:
-![billing.png](..%2Fbilling.png))
+![billing.png](..%2Fbilling.png)
 
 
