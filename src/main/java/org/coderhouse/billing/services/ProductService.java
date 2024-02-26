@@ -49,7 +49,7 @@ public class ProductService {
         return productRepository.findAll()
                 .stream()
                 .filter(Product::getIsActive) // Filter only active products
-                .map(product -> new ProductDTO(product))
+                .map(ProductDTO::new)
                 .collect(Collectors.toList());
 
     }
@@ -117,6 +117,30 @@ public class ProductService {
                 .stream()
                 .mapToInt(SaleProduct::getQuantity)
                 .sum();
+    }
+
+    public void createProduct(ProductDTO productDTO) {
+        //Verify that the tDTO object is not null
+        if (productDTO == null) {
+
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SaleRequestDTO is null");
+
+        }
+
+        Product product = productRepository.getProductByCode(productDTO.getCode());
+
+        if (product != null) {
+
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Product wit code: " + productDTO.getCode() + " already exist");
+        }
+
+
+        Product newProduct = new Product(productDTO.getName(), productDTO.getStock(), productDTO.getCode(),
+                productDTO.getDescription(), productDTO.getPrice());
+
+        newProduct.setIsActive(true);
+
+        saveProduct(newProduct);
     }
 
 }

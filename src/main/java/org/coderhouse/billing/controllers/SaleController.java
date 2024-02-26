@@ -80,7 +80,7 @@ public class SaleController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Sale deactivated successfully"),
                     @ApiResponse(responseCode = "404", description = "Sale not found"),
-                    @ApiResponse(responseCode = "404", description = "Sale not active")
+                    @ApiResponse(responseCode = "404", description = "Sale is not active")
             }
     )
     @PutMapping("/{saleId}/sales")
@@ -101,6 +101,8 @@ public class SaleController {
         }
 
     }
+
+
 
 
 }

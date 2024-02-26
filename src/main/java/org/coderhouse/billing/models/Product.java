@@ -30,7 +30,7 @@ public class Product {
     private Integer stock;
 
     @NonNull
-    private Integer code;
+    private String code;
 
     @NonNull
     private String description;
