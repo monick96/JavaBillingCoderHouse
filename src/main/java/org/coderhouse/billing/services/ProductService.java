@@ -60,24 +60,26 @@ public class ProductService {
         return optionalProduct.isPresent();
     }
 
-    public ResponseEntity<Object> stockAvailable(Integer productId, Integer productQuantity){
+    public void stockAvailable(Integer productId, Integer productQuantity){
 
-        //obtain the product
-        Product product = getProductById(productId);
+        try {
+            // Obtain the product and verify its active status
+            Product product = getProductById(productId);
 
-        //verify the product isActive
-        if (product.getIsActive() && product.getStock() < productQuantity ) {
-
-            return ResponseEntity.ok().build();
+            // Verify stock availability
+            if (product.getStock() < productQuantity) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient stock for product with ID: " + productId);
+            }
+        } catch (ResponseStatusException ex) {
+            // Log the exception or perform any necessary actions
+            ex.printStackTrace();
+            throw ex; // Re-throw the exception to propagate it to the controller
         }
-
-
-        return ResponseEntity.status(HttpStatus.CONFLICT).body("Product not found or Insufficient stock for product with id: " + product.getId());
 
     }
 
     //method to update stock
-    public ResponseEntity<Object> updateStock(Integer productId, Integer productQuantity) {
+    public void updateStock(Integer productId, Integer productQuantity) {
         //Check if there is enough stock available
         ResponseEntity<Object> stockAvailabilityResponse = stockAvailable(productId, productQuantity);
 
@@ -105,8 +107,8 @@ public class ProductService {
         Product product = getProductById(productId);
         if (product != null && !Objects.equals(product.getPrice(), newPrice)) {
             //set new price
-            product.setPrice(newPrice); // Actualiza el precio actual
-            productRepository.save(product); // Guarda el producto actualizado
+            product.setPrice(newPrice); // update current price
+            productRepository.save(product); // save update product price
         }
         return product;
     }
@@ -119,11 +121,11 @@ public class ProductService {
                 .sum();
     }
 
-    public void createProduct(ProductDTO productDTO) {
+    public ProductDTO createProduct(ProductDTO productDTO) {
         //Verify that the tDTO object is not null
         if (productDTO == null) {
 
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "SaleRequestDTO is null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ProductDTO is null");
 
         }
 
@@ -141,6 +143,7 @@ public class ProductService {
         newProduct.setIsActive(true);
 
         saveProduct(newProduct);
+        return productDTO;
     }
 
 }

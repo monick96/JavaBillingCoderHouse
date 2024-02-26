@@ -10,6 +10,7 @@ import org.coderhouse.billing.models.Product;
 import org.coderhouse.billing.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -50,6 +51,18 @@ public class ProductController {
 
     }
 
+    @Operation(
+            summary = "Update product price",
+            description = "update the product price with the received ID",
+            operationId = "updateProduct",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Price product successfully",
+                            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = Product.class))),
+                            @ApiResponse(responseCode = "404", description = "Product not found"),
+                            @ApiResponse(responseCode = "409", description = "product not found")
+
+            }
+    )
     @PutMapping("/{productId}/products")
     public ResponseEntity<Object> updateProductPrice(@PathVariable Integer productId, @RequestParam Long newPrice) {
         Product updatedProduct = productService.updateProductPrice(productId, newPrice);
@@ -63,6 +76,18 @@ public class ProductController {
         }
     }
 
+
+    @Operation(
+            summary = "create product",
+            description = "create a product with the received ProductDTO",
+            operationId = "createProduct",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Product created successfully"),
+                    @ApiResponse(responseCode = "409", description = "Product already exist"),
+                    @ApiResponse(responseCode = "400", description = "Bad request, ProductDTO It can not be null")
+
+            }
+    )
     @PostMapping("/products")
     public ResponseEntity<Object>createProduct(@RequestBody ProductDTO productDTO){
 
