@@ -1,4 +1,5 @@
 package org.coderhouse.billing.services;
+
 import org.apache.commons.lang3.math.NumberUtils;
 import org.coderhouse.billing.dtos.SaleItemDTO;
 import org.coderhouse.billing.dtos.SaleReceiptDTO;
@@ -9,12 +10,12 @@ import org.coderhouse.billing.repositories.SaleReceiptRepository;
 import org.coderhouse.billing.repositories.SaleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,30 +47,33 @@ public class SaleService {
 
     //verify client has sale by client an is active true
     public List<Sale> getActiveSales(Client client) {
-        // Verificar si el cliente tiene ventas activas
-        return saleRepository.findByClientAndIsActiveTrue(client);
+        // Check if the customer has active sales
+        List<Sale> sales = saleRepository.getByClientAndIsActiveTrue(client);
+
+        if (sales == null || sales.isEmpty()) {
+
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found sales");
+        }
+
+        return sales;
+
     }
 
 
     //obtain all sales
-    public List<SaleReceiptDTO> getSalesReceiptsDTO(){
+    public List<SaleReceiptDTO>  mapSalesReceiptsDTO(){
         List<SaleReceipt> saleReceipts = saleReceiptRepository.findAll();
 
-        if (!saleReceipts.isEmpty()) {
             return saleReceipts .stream()
                     .map(SaleReceiptDTO::new)
                     .collect(Collectors.toList());
 
-        }else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No found receipts.");
-        }
-
     }
 
     // receive DTO from sales to generate receipt
-    public ResponseEntity<Object> createSale(SaleRequestDTO saleRequestDTO){
+    public SaleReceiptDTO createSale(SaleRequestDTO saleRequestDTO){
 
-        ValidSaleRequestDTO(saleRequestDTO);
+        ///ValidateSaleRequestDTO(saleRequestDTO);
 
         //create a new sale object
         Sale newSale = new Sale();
@@ -114,8 +118,6 @@ public class SaleService {
 
         }
 
-
-
         //generate date for the buy
         LocalDateTime datePurchase = externalWebService.getCurrentDate();
         //assign date to sale
@@ -138,35 +140,36 @@ public class SaleService {
 
         SaleReceiptDTO saleReceiptDTO = new SaleReceiptDTO(saleReceipt);
 
-        return ResponseEntity.ok(saleReceiptDTO);
+        return saleReceiptDTO;
 
     }
 
     //validate SaleRequestDTO
-    public ResponseEntity<Object> ValidSaleRequestDTO(SaleRequestDTO saleRequestDTO) {
+    public void ValidateSaleRequestDTO(SaleRequestDTO saleRequestDTO) {
         //Verify that the SaleRequestDTO object is not null
         if (saleRequestDTO == null) {
 
-            return ResponseEntity.badRequest().body("SaleRequestDTO is null");
+           // return ResponseEntity.badRequest().body("SaleRequestDTO is null");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"SaleRequestDTO is null" );
 
         }
 
         //Verify that the ClientId in SaleRequestDTO is not null and has a valid ID
         if (saleRequestDTO.getClientId() == null || saleRequestDTO.getClientId() <= 0) {
 
-            return ResponseEntity.badRequest().body("Invalid Client ID in SaleRequestDTO");
-
+            //return ResponseEntity.badRequest().body("Invalid Client ID in SaleRequestDTO");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid Client ID" );
 
         }
 
         //validate if client exist in DB
-        clientService.isClientValidById(saleRequestDTO.getClientId());
+        clientService.validateClientById(saleRequestDTO.getClientId());
 
         // Verify that the list of sales items is not null or empty
         if (saleRequestDTO.getSales() == null || saleRequestDTO.getSales().isEmpty()) {
 
-            return ResponseEntity.badRequest().body("Sales list is null or empty");
-
+            //return ResponseEntity.badRequest().body("Sales list is null or empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Sales list is null or empty" );
 
         }
 
@@ -175,8 +178,8 @@ public class SaleService {
             // Verify that the quantity is a positive and integer number
             if (!NumberUtils.isCreatable(String.valueOf(saleItemDTO.getQuantity()))) {
 
-                return ResponseEntity.badRequest().body("Quantity must be a number");
-
+                //return ResponseEntity.badRequest().body("Quantity must be a number");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Quantity must be a number" );
 
             }
 
@@ -184,34 +187,35 @@ public class SaleService {
 
             if (quantity <= 0) {
 
-                return ResponseEntity.badRequest().body("Quantity must be a positive integer");
+                //return ResponseEntity.badRequest().body("Quantity must be a positive integer");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Quantity must be a positive integer number");
 
             }
         }
-
 
         // Verify that the productId in SaleItemDTO is not null and has a valid ID
         for (SaleItemDTO saleItemDTO: saleRequestDTO.getSales()){
 
             if(saleItemDTO.getProductId()==null){
 
-                return ResponseEntity.badRequest().body("Product ID in SaleItemDTO must not be null");
-
+                //return ResponseEntity.badRequest().body("Product ID in SaleItemDTO must not be null");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Product ID in SaleItemDTO must not be null");
 
             }
 
             // Verify that productId is a positive integer
             if (!NumberUtils.isDigits(String.valueOf(saleItemDTO.getProductId())) || Integer.parseInt(String.valueOf(saleItemDTO.getProductId())) <= 0) {
 
-                return ResponseEntity.badRequest().body("Invalid Product ID in SaleItemDTO");
-
+                //return ResponseEntity.badRequest().body("Invalid Product ID in SaleItemDTO");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Invalid Product ID in SaleItemDTO");
 
             }
+
             //verify that the product exist in db
             if (!productService.isProductExistById(saleItemDTO.getProductId())){
 
-                return ResponseEntity.badRequest().body("Product with ID " + saleItemDTO.getProductId() + " not found");
-
+               // return ResponseEntity.badRequest().body("Product with ID " + saleItemDTO.getProductId() + " not found");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Product with ID " + saleItemDTO.getProductId() + " not found");
 
             }
 
@@ -224,34 +228,7 @@ public class SaleService {
         }
 
         // If it passes all the checks, consider it valid
-        return ResponseEntity.ok().build();
-    }
-
-
-
-    //sale receipt by id
-    public SaleReceiptDTO generateSaleReceipt(Integer saleId){
-
-        Optional<Sale> optionalSale = saleRepository.findById(saleId);
-
-        //verify the sale is saved in DB;
-        if (optionalSale.isPresent()){
-
-            Sale sale = optionalSale.get();
-
-            SaleReceipt saleReceipt = new SaleReceipt(sale);
-
-            saleReceiptRepository.save(saleReceipt);
-
-            return new SaleReceiptDTO(saleReceipt);
-
-        }else {
-
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sale not found.");
-
-        }
-
-
+        //return ResponseEntity.ok().build();
     }
 
     public Sale findSaleById(Integer saleId) {
@@ -273,12 +250,27 @@ public class SaleService {
 
     public void deactivateSale(Integer saleId){
 
-        Sale sale= findSaleById(saleId);
+        Sale sale= saleRepository.getSaleByIdAndIsActiveTrue(saleId);
 
-        if (saleRepository.existsById(saleId) && sale != null){
+        if (sale != null){
             sale.setIsActive(false);
             saveSale(sale);
         }
+    }
+
+
+    public void deactivateActiveSalesForClient(Client client) {
+        // obtain all sales active from client
+        List<Sale> activeSales = getActiveSales(client);
+
+        if (!activeSales.isEmpty()){
+            // Iterate over each active sale and deactivate it
+            for (Sale sale : activeSales) {
+                sale.setIsActive(false);
+                saveSale(sale);
+            }
+        }
+        //throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not active sales from this Client");
     }
 
 

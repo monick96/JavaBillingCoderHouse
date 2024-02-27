@@ -7,13 +7,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.coderhouse.billing.dtos.ClientDTO;
 import org.coderhouse.billing.models.Client;
-import org.coderhouse.billing.models.Sale;
 import org.coderhouse.billing.services.ClientService;
 import org.coderhouse.billing.services.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -68,8 +68,18 @@ public class ClientController {
     public ResponseEntity<Object> registerClient(
             @RequestParam String name, @RequestParam String lastName,
             @RequestParam String dni, @RequestParam LocalDate birthdate){
+        try{
+            Client client = clientService.registerNewClient(name, lastName, dni, birthdate);
 
-        return clientService.registerNewClient(name, lastName, dni, birthdate);
+            ClientDTO clientDTO = clientService.getClientDTO(client);
+
+            return ResponseEntity.ok(clientDTO);
+        }catch (ResponseStatusException ex) {
+
+            // Catches the exception if the client not found and returns a 404 response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+
+        }
 
     }
 
@@ -84,45 +94,24 @@ public class ClientController {
             @Parameter(description = "ID of the client to deactivate", required = true)
             @RequestParam Integer clientID) {
 
-        //validate client is saved in DB
-        Client client = clientService.getClientById(clientID);
+        try {
+            //validate client is saved in DB
+            Client client = clientService.getClientById(clientID);
 
-        if (client == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
-        }
+            //deactivate sales actives from this client
+            saleService.deactivateActiveSalesForClient(client);
 
-
-        if (client.getIsActive()) {
-            //verify client has active sales
-            List<Sale> activeSales = saleService.getActiveSales(client);
-
-            if (!activeSales.isEmpty()) {
-
-                activeSales.forEach(sale -> {
-                    // Deactivate each active sale
-                    sale.setIsActive(false);
-
-                    // save changes in sales
-                    saleService.saveSale(sale);
-                });
-
-            }
-
-            // Desactivar el cliente
-            client.setIsActive(false);
-            clientService.saveClient(client);
+            //deactivate client
+            clientService.deactivateClient(client);
 
             return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
 
-        } else {
+        } catch (ResponseStatusException ex) {
 
-            // The client is not active, so we return a "Bad Request" error
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Client is not active and cannot be deactivated");
+            // Catches the exception if the client not found and returns a 404 response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
 
         }
-
     }
-
-
 
 }

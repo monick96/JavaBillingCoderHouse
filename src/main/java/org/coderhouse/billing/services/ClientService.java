@@ -23,8 +23,6 @@ public class ClientService {
     @Autowired
     private ClientRepository clientRepository; //allows access to methods and functionality
                                                 // provided by ClientRepository within ClientService
-    //@Autowired
-   // private SaleService saleService;
 
     public void saveClient(Client client){
 
@@ -40,6 +38,13 @@ public class ClientService {
             return optionalClient.get();
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found");
+    }
+
+    //get client dto from client
+    public ClientDTO getClientDTO(Client client){
+
+        return new ClientDTO(client);
+
     }
 
     //method to get all clients
@@ -97,16 +102,12 @@ public class ClientService {
     }
 
     ///validate by id
-    public boolean isClientValidById(Integer clientId){
+    public void validateClientById(Integer clientId){
 
         Optional<Client> checkClient = clientRepository.findById(clientId);
 
         //verify the client is saved in DB;
-        if (checkClient.isPresent()){
-
-            return true;
-
-        }else {
+        if (checkClient.isEmpty()){
 
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found.");
 
@@ -114,7 +115,7 @@ public class ClientService {
 
     }
     
-    public ResponseEntity<Object> registerNewClient(String name,  String lastName,String dni, LocalDate birthdate){
+    public Client registerNewClient(String name,  String lastName,String dni, LocalDate birthdate){
 
         //validate params is not null
         if (name.isBlank() || lastName.isBlank() || dni.isBlank() || birthdate == null) {
@@ -133,21 +134,20 @@ public class ClientService {
 
                 missingField = "DNI";
 
-            } else if (birthdate == null) {
+            } else {
 
                 missingField = "Birthdate";
 
             }
 
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(missingField + " is missing");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, missingField + " is missing");
 
         }
 
         //validate client exist by DNI
         if (clientRepository.getClientByDni(dni) !=  null) {
 
-            //return new ResponseEntity<>("mail already in use", HttpStatus.FORBIDDEN);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Client already exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client already exist");
 
         }
 
@@ -166,47 +166,23 @@ public class ClientService {
         //save client
         saveClient(newClient);
 
-        //return response successful registration
-        return ResponseEntity.status(HttpStatus.CREATED).body("Successful registration");
+        return newClient;
 
     }
 
-//    public ResponseEntity<Object> deactivateClient(Integer clientID){
-//        //validate client is saved in DB
-//        Client client = clientRepository.findById(clientID)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not found"));
-//
-//        if (client.getIsActive()) {
-//            //verify client has active sales
-//            List <Sale> activeSales = saleService.getActiveSales(client);
-//
-//            if (!activeSales.isEmpty()) {
-//
-//                activeSales.forEach(sale -> {
-//                    // Deactivate each active sale
-//                    sale.setIsActive(false);
-//
-//                    // save changes in sales
-//                    saleService.saveSale(sale);
-//                });
-//
-//            }
-//
-//            // Desactivar el cliente
-//            client.setIsActive(false);
-//            saveClient(client);
-//
-//            return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
-//
-//        }else {
-//
-//            // The client is not active, so we return a "Bad Request" error
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Client is not active and cannot be deactivated");
-//
-//        }
-//
-//    }
+    public void deactivateClient(Client client){
 
+        if (client.getIsActive()) {
 
+            client.setIsActive(false);
+            saveClient(client);
+
+        }else {
+
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Client not Found");
+
+        }
+
+    }
 
 }

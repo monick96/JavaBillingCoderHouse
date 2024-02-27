@@ -14,5 +14,8 @@ public interface SaleRepository extends JpaRepository<Sale,Integer> {
 
     List<Sale> findByIsActiveTrue();
 
+    Sale getSaleByIdAndIsActiveTrue(Integer saleId);
 
+
+    List<Sale> getByClientAndIsActiveTrue(Client client);
 }

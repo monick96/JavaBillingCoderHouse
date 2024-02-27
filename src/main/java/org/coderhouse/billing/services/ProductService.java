@@ -60,46 +60,38 @@ public class ProductService {
         return optionalProduct.isPresent();
     }
 
-    public void stockAvailable(Integer productId, Integer productQuantity){
+    public void stockAvailable(Integer productId, Integer productQuantity) {
 
-        try {
-            // Obtain the product and verify its active status
-            Product product = getProductById(productId);
+        // Obtain the product and verify its active status
+        Product product = getProductById(productId);
 
-            // Verify stock availability
-            if (product.getStock() < productQuantity) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient stock for product with ID: " + productId);
-            }
-        } catch (ResponseStatusException ex) {
-            // Log the exception or perform any necessary actions
-            ex.printStackTrace();
-            throw ex; // Re-throw the exception to propagate it to the controller
+        // Verify stock availability
+        if (product.getStock() < productQuantity) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Insufficient stock for product with ID: " + productId);
         }
-
     }
 
     //method to update stock
     public void updateStock(Integer productId, Integer productQuantity) {
-        //Check if there is enough stock available
-        ResponseEntity<Object> stockAvailabilityResponse = stockAvailable(productId, productQuantity);
+        try {
+            // Check if there is enough stock available
+            stockAvailable(productId,productQuantity);
 
-        //Check if there was an error while checking stock availability.
-        if (stockAvailabilityResponse.getStatusCode() != HttpStatus.OK) {
-            // If there is an error, return the same response to report the issue.
-            return stockAvailabilityResponse;
+            // Obtain product
+            Product product = getProductById(productId);
+
+            // Subtract the stock quantity
+            Integer newStockQuantity = product.getStock() - productQuantity;
+            product.setStock(newStockQuantity);
+
+            //Save the updated product to the database
+            productRepository.save(product);
+
+        } catch (ResponseStatusException ex) {
+            // Log the exception or perform any necessary actions
+            ex.printStackTrace();
+            throw ex; // Re-throw the exception to propagate it
         }
-
-        //obtain product
-        Product product = getProductById(productId);
-
-        // Subtract the stock quantity
-        Integer newStockQuantity = product.getStock() - productQuantity;
-        product.setStock(newStockQuantity);
-
-        //Save the updated product to the database
-        productRepository.save(product);
-
-        return ResponseEntity.accepted().body("Successful updated stock");
 
     }
 

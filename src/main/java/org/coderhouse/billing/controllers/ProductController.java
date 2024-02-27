@@ -83,7 +83,7 @@ public class ProductController {
             operationId = "createProduct",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Product created successfully"),
-                    @ApiResponse(responseCode = "409", description = "Product already exist"),
+                    @ApiResponse(responseCode = "409", description = "Conflict,Product already exist"),
                     @ApiResponse(responseCode = "400", description = "Bad request, ProductDTO It can not be null")
 
             }
@@ -98,8 +98,8 @@ public class ProductController {
 
         }catch (ResponseStatusException ex) {
 
-            // Catches the exception if the sale is not found and returns a 404 response
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            // Catches the exception if the sale is not found and returns a response
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 
         }
     }

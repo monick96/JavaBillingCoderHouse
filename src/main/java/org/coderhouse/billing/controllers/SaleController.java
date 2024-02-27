@@ -3,11 +3,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.coderhouse.billing.dtos.SaleReceiptDTO;
 import org.coderhouse.billing.dtos.SaleRequestDTO;
-import org.coderhouse.billing.models.Sale;
-import org.coderhouse.billing.services.ClientService;
 import org.coderhouse.billing.services.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,9 +41,12 @@ public class SaleController {
     )
     @GetMapping("/sales")
     public List<SaleReceiptDTO> getSalesReceiptDTO(){
+        List<SaleReceiptDTO> saleReceiptsDTO = saleService.mapSalesReceiptsDTO();
+        if (!saleReceiptsDTO.isEmpty()){
 
-       return saleService.getSalesReceiptsDTO();
-
+            return saleReceiptsDTO;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found sales receipts");
     }
 
     //create a postMapping method for createsale
@@ -68,9 +68,22 @@ public class SaleController {
     )
     @PostMapping("/sales")
     public ResponseEntity<Object> createSale(@RequestBody SaleRequestDTO saleRequestDTO){
+        try {
+            //validate fields of saleRequestDTO
+            saleService.ValidateSaleRequestDTO(saleRequestDTO);
 
-        return saleService.createSale(saleRequestDTO);
+            //create sale, saleReceipt and saleReceiptDTO
+            SaleReceiptDTO saleReceiptDTO = saleService.createSale(saleRequestDTO);
 
+            //return receipt
+            return ResponseEntity.ok(saleReceiptDTO);
+
+        } catch (ResponseStatusException ex) {
+
+            // Catches the exception if the salerequestDTO is a Bad Request and returns a 400 response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+
+        }
     }
 
     @Operation(
@@ -101,9 +114,6 @@ public class SaleController {
         }
 
     }
-
-
-
 
 }
 
