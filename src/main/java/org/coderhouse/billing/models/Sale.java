@@ -32,6 +32,8 @@ public class Sale {
 
     private Long total;
 
+    private Boolean isActive;
+
 
     @ManyToOne //many-to-one relationship with SaleProduct
     @JoinColumn(name ="client_id")
@@ -41,10 +43,12 @@ public class Sale {
     @OneToMany (mappedBy="sale", fetch=FetchType.LAZY) //one-to-may relationship with SaleProduct
     private Set <SaleProduct> saleProducts = new HashSet<>();
 
+
     public void addSaleProduct(SaleProduct saleProduct){
         saleProduct.setSale(this);
         saleProducts.add(saleProduct);
     }
+
 
     @Override
     public String toString(){

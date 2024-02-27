@@ -7,6 +7,8 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.coderhouse.billing.models.Sale;
 import org.coderhouse.billing.models.SaleProduct;
+import org.coderhouse.billing.models.SaleReceipt;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,20 +39,41 @@ public class SaleReceiptDTO {
     private List<SaleProductDTO> saleProducts = new ArrayList<>();
 
 
-    public SaleReceiptDTO(Sale sale){
+//    public SaleReceiptDTO(Sale sale){
+//
+//        this.clientName = sale.getClient().getName() + " " + sale.getClient().getLastName();
+//
+//        this.date = sale.getDate();
+//
+//        for (SaleProduct saleProduct: sale.getSaleProducts()){
+//
+//            SaleProductDTO saleProductDTO = new SaleProductDTO(saleProduct);
+//
+//            this.saleProducts.add(saleProductDTO);
+//        }
+//
+//        this.totalPurchase = sale.getTotal();
+//
+//
+//    }
 
-        this.clientName = sale.getClient().getName() + " " + sale.getClient().getLastName();
-        
-        this.date = sale.getDate();
 
-        for (SaleProduct saleProduct: sale.getSaleProducts()){
+    public SaleReceiptDTO(SaleReceipt saleReceipt){
+
+        this.clientName = saleReceipt.getClientName();
+
+        this.date = saleReceipt.getDate();
+
+        this.totalProductQuantity = saleReceipt.getTotalProductQuantity();
+
+        this.totalPurchase = saleReceipt.getTotalPurchase();
+
+        for (SaleProduct saleProduct: saleReceipt.getSaleProducts()){
 
             SaleProductDTO saleProductDTO = new SaleProductDTO(saleProduct);
 
             this.saleProducts.add(saleProductDTO);
         }
-
-        this.totalPurchase = sale.getTotal();
 
 
     }

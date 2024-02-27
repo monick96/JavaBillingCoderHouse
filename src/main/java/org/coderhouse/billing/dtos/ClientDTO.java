@@ -12,6 +12,9 @@ import org.hibernate.annotations.GenericGenerator;
 @Getter //generate all getters for all properties
 public class ClientDTO {
     //properties
+    @Schema(description = "ID of the client", required = true, example = "1")
+    private Integer id;
+
     @Schema(description = "Name of the client", required = true, example = "Juana")
     private String name;
 
@@ -22,6 +25,7 @@ public class ClientDTO {
     private Integer age;
 
     public ClientDTO(Client client){
+        this.id = client.getId();
 
         this.name = client.getName();
 

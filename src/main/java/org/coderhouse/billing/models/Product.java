@@ -1,10 +1,10 @@
 package org.coderhouse.billing.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,7 +19,7 @@ public class Product {
     //properties
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @GenericGenerator(name = "native", strategy = "native")
+    @GenericGenerator(name = "native")
     @Getter //only getter for id- field-level annotation takes priority
     private Integer id;
 
@@ -30,7 +30,7 @@ public class Product {
     private Integer stock;
 
     @NonNull
-    private Integer code;
+    private String code;
 
     @NonNull
     private String description;
@@ -38,6 +38,9 @@ public class Product {
     @NonNull
     private Long price;
 
+    private Boolean isActive;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
     private Set<SaleProduct> saleProducts = new HashSet<>();
 

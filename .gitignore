@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+#Swagger
+swagger.json
+swagger-ui.html
+.swagger-codegen

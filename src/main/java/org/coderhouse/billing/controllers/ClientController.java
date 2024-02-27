@@ -1,20 +1,21 @@
 package org.coderhouse.billing.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.coderhouse.billing.dtos.ClientDTO;
-import org.coderhouse.billing.dtos.SaleReceiptDTO;
 import org.coderhouse.billing.models.Client;
-import org.coderhouse.billing.repositories.ClientRepository;
 import org.coderhouse.billing.services.ClientService;
+import org.coderhouse.billing.services.SaleService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -22,6 +23,9 @@ import java.util.List;
 public class ClientController {
     @Autowired
     private ClientService clientService;
+
+    @Autowired
+    private SaleService saleService;
 
     //obtain all clientsDTO
     @Operation(
@@ -45,12 +49,69 @@ public class ClientController {
     public List<ClientDTO> getClients(){
 
         //obtain all clients
-        List<ClientDTO> clientList = clientService.getClientsDTOList();
 
-        return  clientList;
+        return clientService.getClientsDTOList();
 
     }
 
+    @Operation(summary = "Register a new client",
+            description = "Registers a new client with the provided details.",
+            operationId = "registerClient",
+            responses = {
+                    @ApiResponse(responseCode = "201", description = "Client registered successfully"),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Bad request"),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Missing field"),
+                    @ApiResponse(responseCode = "409", description = "Conflict: Client already exists")
+            }
+    )
+    @PostMapping("/clients")
+    public ResponseEntity<Object> registerClient(
+            @RequestParam String name, @RequestParam String lastName,
+            @RequestParam String dni, @RequestParam LocalDate birthdate){
+        try{
+            Client client = clientService.registerNewClient(name, lastName, dni, birthdate);
 
+            ClientDTO clientDTO = clientService.getClientDTO(client);
+
+            return ResponseEntity.ok(clientDTO);
+        }catch (ResponseStatusException ex) {
+
+            // Catches the exception if the client not found and returns a 404 response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+
+        }
+
+    }
+
+    @PutMapping("/clients")
+    @Operation(summary = "Deactivate a client",
+            description = "Deactivates a client and all associated active sales.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Client and associated sales deactivated successfully"),
+                    @ApiResponse(responseCode = "404", description = "Client not found")
+            })
+    public ResponseEntity<Object>deactivateClient(
+            @Parameter(description = "ID of the client to deactivate", required = true)
+            @RequestParam Integer clientID) {
+
+        try {
+            //validate client is saved in DB
+            Client client = clientService.getClientById(clientID);
+
+            //deactivate sales actives from this client
+            saleService.deactivateActiveSalesForClient(client);
+
+            //deactivate client
+            clientService.deactivateClient(client);
+
+            return ResponseEntity.status(HttpStatus.OK).body("Client and Sales deactivated successfully");
+
+        } catch (ResponseStatusException ex) {
+
+            // Catches the exception if the client not found and returns a 404 response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+
+        }
+    }
 
 }
