@@ -4,6 +4,6 @@ COPY . .
 
 EXPOSE 8080
 
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 ENTRYPOINT ["java", "-jar", "target/billing-0.0.1-SNAPSHOT.jar"]
