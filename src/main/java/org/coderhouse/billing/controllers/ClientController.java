@@ -79,7 +79,7 @@ public class ClientController {
         }catch (ResponseStatusException ex) {
 
             // Catches the exception if the client not found and returns a 404 response
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 
         }
 
