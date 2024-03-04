@@ -66,8 +66,10 @@ public class ClientController {
     )
     @PostMapping("/clients")
     public ResponseEntity<Object> registerClient(
-            @RequestParam String name, @RequestParam String lastName,
-            @RequestParam String dni, @RequestParam LocalDate birthdate){
+            @Parameter(description = "Name of the client", example = "John") @RequestParam String name,
+            @Parameter(description = "Last name of the client", example = "Doe") @RequestParam String lastName,
+            @Parameter(description = "DNI of the client", example = "12345678") @RequestParam String dni,
+            @Parameter(description = "Birthdate of the client", example = "1990-01-01")@RequestParam LocalDate birthdate){
         try{
             Client client = clientService.registerNewClient(name, lastName, dni, birthdate);
 
@@ -77,7 +79,7 @@ public class ClientController {
         }catch (ResponseStatusException ex) {
 
             // Catches the exception if the client not found and returns a 404 response
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
 
         }
 

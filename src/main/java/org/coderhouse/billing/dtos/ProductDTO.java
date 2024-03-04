@@ -9,11 +9,11 @@ import org.coderhouse.billing.models.Product;
 import org.coderhouse.billing.models.SaleProduct;
 
 @NoArgsConstructor //generate constructor without any arguments
-@RequiredArgsConstructor//generate constructor with only required arguments
+//@RequiredArgsConstructor//generate constructor with only required arguments
 @Getter //generate all getters for all properties
 public class ProductDTO {
     //@NonNull
-    @Schema(description = "ID of the product", required = true, example = "1")
+    @Schema(description = "ID of the product", example = "1")
     private Integer id;
 
     @NonNull
@@ -36,6 +36,7 @@ public class ProductDTO {
     @Schema(description = "Code of the product", required = true, example = "3095")
     private String code;
 
+    //output dto
     public ProductDTO(Product product){
         this.id = product.getId();
 
@@ -49,6 +50,21 @@ public class ProductDTO {
 
         this.code = product.getCode();
     }
+
+    //input DTO
+    public ProductDTO(String name, Integer stock, String description, Long price, String code ){
+
+        this.name = name;
+
+        this.stock = stock;
+
+        this.description = description;
+
+        this.price = price;
+
+        this.code = code;
+    }
+
 
 
 

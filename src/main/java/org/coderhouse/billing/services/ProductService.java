@@ -135,7 +135,11 @@ public class ProductService {
         newProduct.setIsActive(true);
 
         saveProduct(newProduct);
-        return productDTO;
+
+        ProductDTO productDTO1 = new ProductDTO(newProduct.getName(), newProduct.getStock(), newProduct.getDescription(),
+                newProduct.getPrice(), newProduct.getCode());
+
+        return productDTO1;
     }
 
 }
